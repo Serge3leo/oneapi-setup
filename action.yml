@@ -26,7 +26,7 @@ runs:
     - name: oneAPI directory and key
       id: _
       shell: bash
-      run:
+      run: |
         echo key="oneAPI_${{ inputs.version }}_0.1" >> $GITHUB_OUTPUT
         echo path=/opt/intel/oneapi >> $GITHUB_OUTPUT
 
