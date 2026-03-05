@@ -22,17 +22,20 @@ inputs:
     description: A specific version to install.
 runs:
   using: composite
-  env:
-    key: oneAPI_${{ inputs.version }}_0.1
-    path: /opt/intel/oneapi
-
   steps:
+    - name: oneAPI directory and key
+      id: _
+      shell: bash
+      run:
+        echo key="oneAPI_${{ inputs.version }}_0.1" >> $GITHUB_OUTPUT
+        echo path=/opt/intel/oneapi >> $GITHUB_OUTPUT
+
     - name: Restore cached oneAPI directory
       id: cache
       uses: actions/cache/restore@v5
       with:
-        key: ${{ env.key }}
-        path: ${{ env.path }}
+        key: ${{ steps._.outputs.key }}
+        path: ${{ steps._.outputs.path }}
 
     - name: Install oneAPI
       if: steps.cache.outputs.cache-hit != 'true'
@@ -72,26 +75,27 @@ runs:
       run: |
         # oneapi_cache_exclude_linux.sh
         #
-        LATEST_VERSION=$(ls -1 "${{ env.path }}/compiler/" | \
+        LATEST_VERSION=$(ls -1 "${{ steps._.outputs.path }}/compiler/" | \
                          grep -v latest | sort | tail -1)
         unneeded = compiler/lib/ia32_lin \
                    bin/ia32 \
                    lib/emu \
                    lib/oclfpga
         for u in $unneeded ; do
-          sudo rm -rf "${{ env.path }}/compiler/$LATEST_VERSION/linux/$u"
+          sudo rm -rf \
+            "${{ steps._.outputs.path }}/compiler/$LATEST_VERSION/linux/$u"
         done
 
     - name: Save cached oneAPI directory
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/cache/save@v5
       with:
-        key: ${{ env.key }}
-        path: ${{ env.path }}
+        key: ${{ steps._.outputs.key }}
+        path: ${{ steps._.outputs.path }}
 
     - name: Setup Intel oneAPI environment
       run: |
-        source "${{ env.path }}/setvars.sh"
+        source "${{ steps._.outputs.path }}/setvars.sh"
         printenv >> $GITHUB_ENV
 
     - name: Show version
