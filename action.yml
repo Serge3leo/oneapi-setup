@@ -56,11 +56,6 @@ runs:
              " $I/oneapi all main" \
           | sudo tee /etc/apt/sources.list.d/oneAPI.list
 
-        if ${{ fromJSON(inputs.verbose) }} ; then
-          head /usr/share/keyrings/oneapi-archive-keyring.gpg \
-               /etc/apt/sources.list.d/oneAPI.list
-        fi
-
         sudo apt-get update \
           -o Dir::Etc::sourcelist="sources.list.d/oneAPI.list" \
           -o APT::Get::List-Cleanup="0"
@@ -77,10 +72,10 @@ runs:
         #
         LATEST_VERSION=$(ls -1 "${{ steps._.outputs.path }}/compiler/" | \
                          grep -v latest | sort | tail -1)
-        unneeded = compiler/lib/ia32_lin \
-                   bin/ia32 \
-                   lib/emu \
-                   lib/oclfpga
+        unneeded=compiler/lib/ia32_lin \
+                 bin/ia32 \
+                 lib/emu \
+                 lib/oclfpga
         for u in $unneeded ; do
           sudo rm -rf \
             "${{ steps._.outputs.path }}/compiler/$LATEST_VERSION/linux/$u"
