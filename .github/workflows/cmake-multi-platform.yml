@@ -72,7 +72,7 @@ jobs:
         # https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
 
         run: >
-          cmake -B build
+          cmake -B ./build
           -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
           -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
@@ -85,7 +85,7 @@ jobs:
         # is needed because the default Windows generator is a multi-config
         # generator (Visual Studio generator).
 
-        run: cmake --build build --config ${{ matrix.build_type }}
+        run: cmake --build ./build --config ${{ matrix.build_type }}
 
       - name: Test
         # Execute tests defined by the CMake configuration. Note that
@@ -95,11 +95,11 @@ jobs:
         # detail
 
         run: >
-          cmake -E chdir ctest --output-on-failure
+          cmake -E chdir ./build ctest --output-on-failure
           --build-config ${{ matrix.build_type }}
 
       - name: Run
         run: |
-          cmake -E chdir build ./hello
-          cmake -E chdir build ./hello++
-          cmake -E chdir build ./bsd_echo my args
+          cmake -E chdir ./build ./hello
+          cmake -E chdir ./build ./hello++
+          cmake -E chdir ./build ./bsd_echo my args
