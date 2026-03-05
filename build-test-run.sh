@@ -17,7 +17,6 @@ cmake -B "$build_output_dir" \
         -G "Unix Makefiles" \
         -S .
 cmake --build "$build_output_dir" --config $build_type
-cd "$build_output_dir"
-ctest --build-config $build_type
-./hello
-./hello++
+cmake -E chdir "$build_output_dir" ctest --build-config $build_type
+cmake -E chdir "$build_output_dir" ./hello
+cmake -E chdir "$build_output_dir" ./hello++
