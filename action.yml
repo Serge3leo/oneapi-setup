@@ -1,0 +1,106 @@
+---
+name: Setup oneAPI
+# TODO Review by
+# https://github.com/neelravi/intel-oneapi-github-actions/blob/main/action.yml
+branding:
+  color: blue
+  icon: terminal
+inputs:
+  cache:
+    required: false
+    description: If caching should be used
+    default: true
+  key-prefix:
+    required: false
+    description: Add prefix to cache key (for refresh or identification)
+  verbose:
+    required: false
+    description: Show version and location `icx` & `icpx` form PATH.
+    default: false
+  version:
+    required: false
+    description: A specific version to install.
+runs:
+  using: composite
+  env:
+    key: oneAPI_${{ inputs.version }}_0.1
+    path: /opt/intel/oneapi
+
+  steps:
+    - name: Restore cached oneAPI directory
+      id: cache
+      uses: actions/cache/restore@v5
+      with:
+        key: ${{ env.key }}
+        path: ${{ env.path }}
+
+    - name: Install oneAPI
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        # oneapi_setup_apt_repo_linux.sh
+        #
+        # This script sets up the Intel oneAPI apt repository on a Linux system.
+        # https://www.intel.com/content/www/us/en/docs/oneapi/installation-guide-linux/2025-1/base-apt.html#BASE-APT
+        #
+        I="$I"
+        curl -sS \
+          -L $I/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
+          | gpg --dearmor \
+          | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
+
+        echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg]" \
+             " $I/oneapi all main" \
+          | sudo tee /etc/apt/sources.list.d/oneAPI.list
+
+        if ${{ fromJSON(inputs.verbose) }} ; then
+          head /usr/share/keyrings/oneapi-archive-keyring.gpg \
+               /etc/apt/sources.list.d/oneAPI.list
+        fi
+
+        sudo apt-get update \
+          -o Dir::Etc::sourcelist="sources.list.d/oneAPI.list" \
+          -o APT::Get::List-Cleanup="0"
+
+        # Install
+        sudo apt install --no-install-recommends \
+          intel-oneapi-compiler-dpcpp-cpp-${{ inputs.version }}
+
+    - name: Exclude unused files from cache
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        # oneapi_cache_exclude_linux.sh
+        #
+        LATEST_VERSION=$(ls -1 "${{ env.path }}/compiler/" | \
+                         grep -v latest | sort | tail -1)
+        unneeded = compiler/lib/ia32_lin \
+                   bin/ia32 \
+                   lib/emu \
+                   lib/oclfpga
+        for u in $unneeded ; do
+          sudo rm -rf "${{ env.path }}/compiler/$LATEST_VERSION/linux/$u"
+        done
+
+    - name: Save cached oneAPI directory
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v5
+      with:
+        key: ${{ env.key }}
+        path: ${{ env.path }}
+
+    - name: Setup Intel oneAPI environment
+      run: |
+        source "${{ env.path }}/setvars.sh"
+        printenv >> $GITHUB_ENV
+
+    - name: Show version
+      if: ${{ fromJSON(inputs.verbose) }}
+      run: |
+        echo "PATH=$PATH"
+        echo "---"
+        echo "ONEAPI_ROOT=$ONEAPI_ROOT"
+        type icx
+        icx --version
+        type icpx
+        icpx --version
