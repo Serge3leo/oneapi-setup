@@ -25,7 +25,7 @@ jobs:
       # matrix combinations. Consider changing this to true when your workflow
       # is stable.
 
-      fail-fast: false
+      fail-fast: true
 
       # Set up a matrix to run the following configurations:
       #
@@ -45,9 +45,9 @@ jobs:
         platform: [linux]
         # cmake_add: [--debug-trycompile]
         include:
-          - version: 2025.1
+          - version: 2025.1  # Latest of 2025.1, 2025.1.1-10 at 5 Mar 2026
             os: ubuntu-22.04
-          - version: ""
+          - version: ""  # Latest, 2025.3.2 at 5 Mar 2026
             os: ubuntu-latest
 
     steps:
@@ -63,8 +63,8 @@ jobs:
         uses: ./
         with:
           version: ${{ matrix.version }}
-          verbose: true
-          components: fortran cpp mpi mkl basekit hpckit
+          # verbose: true
+          # components: fortran cpp mpi mkl basekit hpckit
 
       - name: Configure CMake
         # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only
