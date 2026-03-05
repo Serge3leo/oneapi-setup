@@ -153,9 +153,6 @@ runs:
       if: ${{ fromJSON(inputs.verbose) }}
       shell: bash
       run: |
-        echo "PATH=$PATH"
-        echo "---"
-        echo "ONEAPI_ROOT=$ONEAPI_ROOT"
         type icx
         icx --version
         type icpx
