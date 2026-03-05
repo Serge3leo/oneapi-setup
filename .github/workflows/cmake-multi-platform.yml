@@ -25,19 +25,19 @@ jobs:
       # matrix combinations. Consider changing this to true when your workflow
       # is stable.
 
-      fail-fast: false
+      fail-fast: true
 
       # Set up a matrix to run the following configurations:
       #
-      # 1. <Latest OrangeC, windows-2025-vs2026, "MSYS Makefiles">
+      # 1. <IntelLLVM 2025.1, ubuntu-22.04, "Unix Makefiles">
       #
-      # 2. <OrangeC 6.73, windows-2022, "MSYS Makefiles">
+      # 2. <IntelLLVM latest, ubuntu-latest, "Unix Makefiles">
       #
       # To add more build types (Release, Debug, RelWithDebInfo, etc.)
       # customize the build_type list.
 
       matrix:
-        version: [2025.1, 2025.3]
+        version: [2025.1, ""]
         c_compiler: [icx]
         cpp_compiler: [icpx]
         build_type: [Release]
@@ -45,9 +45,9 @@ jobs:
         platform: [linux]
         # cmake_add: [--debug-trycompile]
         include:
-          - version: 2025.1
+          - version: 2025.1  # Latest of 2025.1, 2025.1.1-10 at 5 Mar 2026
             os: ubuntu-22.04
-          - version: 2025.3
+          - version: ""  # Latest, 2025.3.2 at 5 Mar 2026
             os: ubuntu-latest
 
     steps:
@@ -63,7 +63,8 @@ jobs:
         uses: ./
         with:
           version: ${{ matrix.version }}
-          verbose: true
+          # verbose: true
+          # components: fortran cpp mpi mkl basekit hpckit
 
       - name: Configure CMake
         # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only

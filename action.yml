@@ -10,6 +10,12 @@ inputs:
     required: false
     description: If caching should be used
     default: true
+  components:
+    description: >-
+      Space-separated list of Intel OneAPI components to install (e.g.
+      fortran cpp mpi mkl basekit hpckit)
+    required: false
+    default: cpp
   key-prefix:
     required: false
     description: Add prefix to cache key (for refresh or identification)
@@ -23,11 +29,19 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Check OS
+      if: runner.os != 'Linux'
+      shell: bash
+      run: |
+        echo "${{ runner.os }}: unimplemented"
+        false
+
     - name: oneAPI directory and key
       id: _
       shell: bash
       run: |
-        echo key="oneAPI_${{ inputs.version }}_0.1" >> $GITHUB_OUTPUT
+        key="oneAPI_${{ inputs.version }}_${{ inputs.components }}_0.1"
+        echo "key=$key" >> $GITHUB_OUTPUT
         echo path=/opt/intel/oneapi >> $GITHUB_OUTPUT
 
     - name: Restore cached oneAPI directory
@@ -61,8 +75,39 @@ runs:
           -o APT::Get::List-Cleanup="0"
 
         # Install
-        sudo apt install --no-install-recommends \
-          intel-oneapi-compiler-dpcpp-cpp-${{ inputs.version }}
+        vsfx="${{ inputs.version }}"
+        if [ -n "$vsfx" ] ; then
+          vsfx="-$vsfx"
+        fi
+        apt_install() {
+          sudo apt-get install -y --no-install-recommends "$1$vsfx"
+        }
+        for c in ${{ inputs.components }} ; do
+          case $c in
+            basekit)
+              apt_install intel-basekit
+              ;;
+            hpckit)
+              apt_install intel-hpckit
+              ;;
+            fortran)
+              apt_install intel-oneapi-compiler-fortran
+              ;;
+            cpp)
+              apt_install intel-oneapi-compiler-dpcpp-cpp
+              ;;
+            mpi)
+              apt_install intel-oneapi-mpi
+              ;;
+            mkl)
+              apt_install intel-oneapi-mkl
+              ;;
+            *)
+              echo "Unknown component: $component"
+              false
+              ;;
+          esac
+        done
 
     - name: Exclude unused files from cache
       if: steps.cache.outputs.cache-hit != 'true'
@@ -91,8 +136,18 @@ runs:
     - name: Setup Intel oneAPI environment
       shell: bash
       run: |
+        printenv > /tmp/base
         source "${{ steps._.outputs.path }}/setvars.sh"
-        printenv >> $GITHUB_ENV
+        printenv | awk 'BEGIN {
+            while (getline l < "/tmp/base") {
+              base[l] = 1;
+            }
+          }
+          {
+            if (!($0 in base)) {
+              print($0)
+            }
+          }' >> $GITHUB_ENV
 
     - name: Show version
       if: ${{ fromJSON(inputs.verbose) }}
