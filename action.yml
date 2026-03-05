@@ -94,12 +94,14 @@ runs:
         path: ${{ steps._.outputs.path }}
 
     - name: Setup Intel oneAPI environment
+      shell: bash
       run: |
         source "${{ steps._.outputs.path }}/setvars.sh"
         printenv >> $GITHUB_ENV
 
     - name: Show version
       if: ${{ fromJSON(inputs.verbose) }}
+      shell: bash
       run: |
         echo "PATH=$PATH"
         echo "---"
