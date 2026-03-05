@@ -46,7 +46,7 @@ runs:
         # This script sets up the Intel oneAPI apt repository on a Linux system.
         # https://www.intel.com/content/www/us/en/docs/oneapi/installation-guide-linux/2025-1/base-apt.html#BASE-APT
         #
-        I="$I"
+        I="https://apt.repos.intel.com"
         curl -sS \
           -L $I/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
           | gpg --dearmor \
