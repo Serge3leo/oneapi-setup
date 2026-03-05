@@ -40,7 +40,8 @@ runs:
       id: _
       shell: bash
       run: |
-        echo key="oneAPI_${{ inputs.version }}_0.1" >> $GITHUB_OUTPUT
+        key="oneAPI_${{ inputs.version }}_${{ inputs.components }}_0.1"
+        echo "key=$key" >> $GITHUB_OUTPUT
         echo path=/opt/intel/oneapi >> $GITHUB_OUTPUT
 
     - name: Restore cached oneAPI directory
