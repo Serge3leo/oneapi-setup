@@ -72,10 +72,10 @@ runs:
         #
         LATEST_VERSION=$(ls -1 "${{ steps._.outputs.path }}/compiler/" | \
                          grep -v latest | sort | tail -1)
-        unneeded=compiler/lib/ia32_lin \
-                 bin/ia32 \
-                 lib/emu \
-                 lib/oclfpga
+        unneeded="compiler/lib/ia32_lin
+                  bin/ia32
+                  lib/emu
+                  lib/oclfpga"
         for u in $unneeded ; do
           sudo rm -rf \
             "${{ steps._.outputs.path }}/compiler/$LATEST_VERSION/linux/$u"
