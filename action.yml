@@ -91,7 +91,7 @@ runs:
     - name: Setup Intel oneAPI environment
       shell: bash
       run: |
-        pintenv > /tmp/base
+        printenv > /tmp/base
         source "${{ steps._.outputs.path }}/setvars.sh"
         printenv | awk 'BEGIN {
             while (getline l < "/tmp/base") {
