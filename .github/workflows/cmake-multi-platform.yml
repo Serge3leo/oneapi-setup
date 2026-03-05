@@ -37,7 +37,7 @@ jobs:
       # customize the build_type list.
 
       matrix:
-        version: [2025.1 2025.3]
+        version: [2025.1, 2025.3]
         c_compiler: [icx]
         cpp_compiler: [icpx]
         build_type: [Release]
