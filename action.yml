@@ -139,7 +139,7 @@ runs:
         printenv | sort > /tmp/base
         source "${{ steps._.outputs.path }}/setvars.sh"
         printenv | sort | diff /tmp/base - \
-          | sed -n '/^> /s///p' >> $GITHUB_ENV
+          | sed -n '/^> /s///p' >> $GITHUB_ENV || true
 
         if ${{ fromJSON(inputs.verbose) }} ; then
           printenv | sort | diff -u /tmp/base - || true
