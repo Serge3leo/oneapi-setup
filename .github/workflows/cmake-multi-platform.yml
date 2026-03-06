@@ -63,7 +63,7 @@ jobs:
         uses: ./
         with:
           version: ${{ matrix.version }}
-          verbose: true
+          # verbose: true
           # components: fortran cpp mpi mkl basekit hpckit
 
       - name: Configure CMake
