@@ -136,9 +136,9 @@ runs:
     - name: Setup Intel oneAPI environment
       shell: bash
       run: |
-        printenv | sort > /tmp/base
+        printenv | sort -s > /tmp/base
         source "${{ steps._.outputs.path }}/setvars.sh"
-        printenv | sort | (diff /tmp/base - || true) \
+        printenv | sort -s | (diff /tmp/base - || true) \
           | sed -n '/^> /s///p' >> $GITHUB_ENV
 
         if ${{ fromJSON(inputs.verbose) }} ; then
