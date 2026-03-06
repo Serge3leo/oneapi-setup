@@ -136,23 +136,20 @@ runs:
     - name: Setup Intel oneAPI environment
       shell: bash
       run: |
-        printenv > /tmp/base
+        printenv | sort > /tmp/base
         source "${{ steps._.outputs.path }}/setvars.sh"
-        printenv | awk 'BEGIN {
-            while (getline l < "/tmp/base") {
-              base[l] = 1;
-            }
-          }
-          {
-            if (!($0 in base)) {
-              print($0)
-            }
-          }' >> $GITHUB_ENV
+        printenv | sort | diff /tmp/base - \
+          | sed -n '/^> /s///p' >> $GITHUB_ENV
+
+        if ${{ fromJSON(inputs.verbose) }} ; then
+          printenv | sort | diff -u /tmp/base -
+        fi
 
     - name: Show version
       if: ${{ fromJSON(inputs.verbose) }}
       shell: bash
       run: |
+        echo "ONEAPI_ROOT=$ONEAPI_ROOT"
         type icx
         icx --version
         type icpx
