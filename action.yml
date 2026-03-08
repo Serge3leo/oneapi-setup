@@ -139,7 +139,7 @@ runs:
         env -0 | sort -z | tr '\0' '\n' > /tmp/base
         source "${{ steps._.outputs.path }}/setvars.sh"
         env -0 | sort -z | tr '\0' '\n' | (diff /tmp/base - || true) \
-          | sed -n '/^> /s///p'
+          | sed -n '/^> /s///p' >> $GITHUB_ENV
 
         if ${{ fromJSON(inputs.verbose) }} ; then
           env -0 | sort -z | tr '\0' '\n' | (diff /tmp/base - || true)
